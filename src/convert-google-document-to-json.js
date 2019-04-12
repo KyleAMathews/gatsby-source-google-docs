@@ -50,11 +50,42 @@ function getTableCellContent(content) {
     .join("")
 }
 
-function getText(element) {
-  const text = cleanText(element.textRun.content)
-  const {link} = element.textRun.textStyle
+function getText(element, {isHeader = false}) {
+  let text = cleanText(element.textRun.content)
+  const {
+    link,
+    underline,
+    strikethrough,
+    bold,
+    italic,
+  } = element.textRun.textStyle
 
-  return link ? `[${text}](${link.url})` : text
+  if (underline) {
+    // Underline isn't supported in markdown so we'll use emphasis
+    text = `_${text}_`
+  }
+
+  if (italic) {
+    // Underline isn't supported in markdown so we'll use emphasis
+    text = `_${text}_`
+  }
+
+  // Set bold unless it's a header
+  if (bold & !isHeader) {
+    // Underline isn't supported in markdown so we'll use emphasis
+    text = `**${text}**`
+  }
+
+  if (strikethrough) {
+    // Underline isn't supported in markdown so we'll use emphasis
+    text = `~~${text}~~`
+  }
+
+  if (link) {
+    return `[${text}](${link.url})`
+  }
+
+  return text
 }
 
 module.exports = data => {
@@ -115,7 +146,7 @@ module.exports = data => {
           // Headings, Texts
           else if (el.textRun && el.textRun.content !== "\n") {
             tagContent.push({
-              [tag]: getText(el),
+              [tag]: getText(el, {isHeader: tag !== "p"}),
             })
           }
         })
